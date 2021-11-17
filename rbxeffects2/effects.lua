@@ -1,3 +1,8 @@
+--[[
+	effects.lua
+	https://github.com/interpreterK/CustomRBXphysicsAndEffects
+]]
+
 local Module = {
 	Parts = {},
 	Connections = {}
@@ -6,8 +11,7 @@ Module.__index = Module
 
 local RS = game:GetService("RunService")
 local wait = task.wait
-local CN = CFrame.new
-local ANG = CFrame.Angles
+local CN, ANG = CFrame.new, CFrame.Angles
 local Sine, Change = 0, 1
 
 local function ClearConnections(self)
@@ -24,6 +28,7 @@ local function CreatePlainBlock(self, At)
 	Part.Anchored = true
 	Part.Parent = workspace
 	table.insert(self.Parts, Part)
+	return Part
 end
 
 function Module:StopAllEffects(Destroy)
@@ -127,6 +132,20 @@ function Module:CubicSpin(At)
 		end
 	end))
 	CreatePlainBlock(self, At or CN(0, 10, 0))
+end
+
+function Module:StretchyCircle(At)
+	table.insert(self.Connections, RS.Heartbeat:Connect(function()
+		Sine += Change
+		for i = 1, #self.Parts do
+			local Part = self.Parts[i]
+			Part.CFrame = Part.CFrame * CN(0, 0.50, 0.50) * ANG(0.1, 0, 0) * (#self.Parts == 70 and CN(0, 0.50 * math.cos(50 / Sine), 0.50 * math.cos(50 / Sine)) or CN())
+		end
+	end))
+	for i = 1, 70 do
+		CreatePlainBlock(self, At or CN(0, 10, 0))
+		wait(0.01)
+	end
 end
 
 return Module
