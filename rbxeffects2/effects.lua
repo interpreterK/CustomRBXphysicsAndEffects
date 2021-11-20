@@ -184,6 +184,19 @@ function Module:BuildingLineStrip(At)
 	end
 end
 
+function Module:BuildingSpiralStrip(At)
+	insert(self.Connections, RS.Heartbeat:Connect(function()
+		Sine += Change
+		for i = 1, #self.Parts do
+			self.Parts[i].CFrame *= CN(0.1 * math.cos(20 / Sine), 0.1 * math.cos(20 / Sine), 0.1 * math.cos(20 / Sine)) * ANG(-0.1, -0.1, 0.1)
+		end
+	end))
+	for i = 1, 500 do
+		CreatePlainBlock(self, At or CN(0, 10, 0))
+		wait()
+	end
+end
+
 function Module:GenerateTerrain(Xaxis, Zaxis, Seed, Height)
 	local Xaxis, Zaxis = math.abs(Xaxis or 100), math.abs(Zaxis or 100)
 	local Seed = Seed or Random.new():NextNumber(1, 1e5)
