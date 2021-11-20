@@ -129,7 +129,10 @@ function Module:CubicSpin(At)
 			self.Parts[i].CFrame *= CN(0, 0.1 * math.cos(Sine / 50), 0) * ANG(0, 0.1 * math.cos(50 / Sine), 0)
 		end
 	end))
-	CreatePlainBlock(self, At or CN(0, 10, 0))
+	for i = 1, 200 do
+		CreatePlainBlock(self, At or CN(0, 10, 0))
+		wait(0)
+	end
 end
 
 function Module:StretchyCircle(At)
@@ -153,6 +156,19 @@ function Module:CosInfinity(At)
 		end
 	end))
 	for i = 1, 200 do
+		CreatePlainBlock(self, At or CN(0, 10, 0))
+		wait(0)
+	end
+end
+
+function Module:PulseRunningCircles(At)
+	insert(self.Connections, RS.Heartbeat:Connect(function()
+		Sine += Change
+		for i = 1, #self.Parts do
+			self.Parts[i].CFrame *= CN(0, 2 * math.cos(Sine / 85), 0) * ANG(0.1, 0, 0.1)
+		end
+	end))
+	for i = 1, 150 do
 		CreatePlainBlock(self, At or CN(0, 10, 0))
 		wait(0)
 	end
