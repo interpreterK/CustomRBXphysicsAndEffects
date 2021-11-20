@@ -52,7 +52,7 @@ end
 function Module:BlockCircle(At)
 	insert(self.Connections, RS.Heartbeat:Connect(function()
 		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.50, 0.50) * ANG(0.1, 0, 0)
+			self.Parts[i].CFrame *= CN(0, 0.40, 0.40) * ANG(0.1, 0, 0)
 		end
 	end))
 	for i = 1, 9 do
@@ -154,7 +154,7 @@ function Module:CosInfinity(At)
 	end))
 	for i = 1, 200 do
 		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait()
+		wait(0)
 	end
 end
 
@@ -167,7 +167,7 @@ function Module:Rope(At)
 	end))
 	for i = 1, 195 do
 		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait()
+		wait(0)
 	end
 end
 
@@ -193,7 +193,7 @@ function Module:BuildingSpiralStrip(At)
 	end))
 	for i = 1, 500 do
 		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait()
+		wait(0)
 	end
 end
 
