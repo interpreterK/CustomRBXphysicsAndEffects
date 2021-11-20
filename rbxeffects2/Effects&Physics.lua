@@ -205,6 +205,7 @@ function Module:GenerateTerrain(Xaxis, Zaxis, Seed, Height)
 			local Block = CreatePlainBlock(self, CN())
 			Block.Position = V3(X, math.noise(Seed, X/10, Z/10) * (Height or 5), Z)
 		end
+		wait(0)
 	end
 end
 
@@ -216,6 +217,7 @@ function Module:GenerateEvenTerrain(Xaxis, Zaxis, Seed, Height)
 			local Block = CreatePlainBlock(self, CN())
 			Block.Position = V3(X, math.noise(Seed, X/10, Z/10) * (Height or 5), Z) * Block.Size
 		end
+		wait(0)
 	end
 end
 
