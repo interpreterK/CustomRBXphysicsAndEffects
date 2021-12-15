@@ -1,239 +1,253 @@
---[[
-	Effects&Physics.lua
-	https://github.com/interpreterK/CustomRBXphysicsAndEffects
-]]
+-- interpreterK
+-- https://github.com/interpreterK/RBXeffects/blob/main/EffectsModule/src/EffectsModule.lua
+-- All the effects use TweenService so you can control them with built-in TweenService functions such as: ":Play(), ":Cancel()", ".Completed", etc...
 
 local Module = {
-	Parts = {},
-	Connections = {}
+	Autoplay = false, -- Not needed for non-tween functions.
+	NonTweens = {
+		Connections = {}
+	},
 }
 Module.__index = Module
 
+local F = {
+	CN = CFrame.new,
+	ANG = CFrame.Angles,
+	V3 = Vector3.new,
+	RN = Random.new,
+	rad = math.rad,
+	deg = math.deg,
+	pi = math.pi,
+	cos = math.cos,
+	sin = math.sin,
+	sine = 0,
+	wait = task.wait
+}
+local TS = game:GetService("TweenService")
 local RS = game:GetService("RunService")
-local wait = task.wait
-local CN, ANG = CFrame.new, CFrame.Angles
-local Sine, Change = 0, 1
-local V3 = Vector3.new
-local insert = table.insert
 
-local function ClearConnections(self)
-	for _, Connection in next, self.Connections do
-		Connection:Disconnect()
+local function RandDec(min, max)
+	return F.RN():NextNumber(min, max)
+end
+
+local function EnumExist(EnumType, Name)
+	local b, Enum = pcall(function()
+		return EnumType[Name]
+	end)
+	return b and Enum
+end
+
+local function TweeningInfo(Time, Style, Direction)
+	return TweenInfo.new(unpack({
+		Time or 1,
+		EnumExist(Enum.EasingStyle, Style) or Enum.EasingStyle.Quad,
+		EnumExist(Enum.EasingDirection, Direction) or Enum.EasingDirection.Out
+	}))
+end
+
+local function IsAPart(Inst)
+	return typeof(Inst) == "Instance" and Inst:IsA("BasePart")
+end
+
+function Module:ScatterOut(Part, rLimit, vLimit, ...)
+	if IsAPart(Part) then
+		rLimit = rLimit or {-360, 360}
+		vLimit = vLimit or {-15, 15}
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			CFrame = Part.CFrame * F.ANG(F.rad(RandDec(unpack(rLimit))), F.rad(RandDec(unpack(rLimit))), F.rad(RandDec(unpack(rLimit)))) * F.CN(RandDec(unpack(vLimit)), RandDec(unpack(vLimit)), RandDec(unpack(vLimit)))
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:AnglelessScatterOut(Part, vLimit, ...)
+	if IsAPart(Part) then
+		vLimit = vLimit or {-15, 15}
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			CFrame = Part.CFrame * F.CN(RandDec(unpack(vLimit)), RandDec(unpack(vLimit)), RandDec(unpack(vLimit)))
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:CompleteScatterOut(Part, Xlimit, Ylimit, Zlimit, Rlimit, ...) -- Like :ScatterOut but control over all CFrame values.
+	if IsAPart(Part) then
+		Xlimit = Xlimit or {-50, 50}
+		Ylimit = Ylimit or {-50, 50}
+		Zlimit = Zlimit or {-50, 50}
+		Rlimit = Rlimit or {-50, 50}
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			CFrame = Part.CFrame * F.CN(RandDec(unpack(Xlimit)), RandDec(unpack(Ylimit)), RandDec(unpack(Zlimit))) * F.ANG(F.rad(RandDec(unpack(Rlimit))), F.rad(RandDec(unpack(Rlimit))), F.rad(RandDec(unpack(Rlimit))))
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:SizeFactor(Part, sLimit, ...)
+	if IsAPart(Part) then
+		sLimit = sLimit or {0, 0, 0}
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			Size = F.V3(unpack(sLimit))
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:FadeOut(Part, Stop, ...)
+	if IsAPart(Part) then
+		Stop = Stop and Stop < 1 and Stop or 1
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			Transparency = Stop
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:FadeIn(Part, Stop, ...)
+	if IsAPart(Part) then
+		Stop = Stop and Stop > 1 and Stop or 0
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			Transparency = Stop
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:FloatUp(Part, DownBarrier, UpLimit, ...)
+	if IsAPart(Part) then
+		UpLimit = UpLimit or 50
+		DownBarrier = DownBarrier or 30
+
+		Part.CFrame = Part.CFrame - F.V3(0, DownBarrier, 0)
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			CFrame = Part.CFrame + F.V3(0, UpLimit, 0)
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:RandomRotate(Part, rLimit, ...)
+	if IsAPart(Part) then
+		rLimit = rLimit or {-360, 360}
+
+		local Tween = TS:Create(Part, TweeningInfo(...), {
+			CFrame = Part.CFrame * F.ANG(F.rad(RandDec(unpack(rLimit))), F.rad(RandDec(unpack(rLimit))), F.rad(RandDec(unpack(rLimit))))
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+function Module:RandomCFrame(Part, cLimit, ...)
+	if IsAPart(Part) then
+		cLimit = cLimit or {-20, 20}
+
+		local Tween = TS:Create(Part, TweenInfo(...), {
+			CFrame = Part.CFrame * F.CN(unpack(cLimit), unpack(cLimit), unpack(cLimit))
+		})
+		if self.Autoplay then
+			Tween:Play()
+		end
+		return Tween, Part
+	end
+end
+
+-- Non Tweens
+
+function Module.NonTweens:StopEffects()
+	for i = 1, #self.Connections do
+		local con = self.Connections[i]
+		con:Disconnect()
 	end
 	self.Connections = {}
 end
 
-local function CreatePlainBlock(self, At)
-	local Part = Instance.new("Part")
-	Part.CFrame = At
-	Part.Anchored = true
-	Part.Parent = workspace
-	insert(self.Parts, Part)
-	return Part
-end
-
-function Module:StopAllEffects(Destroy)
-	ClearConnections(self)
-	for _, Part in next, self.Parts do
-		if Destroy then
-			pcall(function()
-				Part:Destroy()
-			end)
-		else
-			pcall(function()
-				Part.CanCollide = true
-				Part.Anchored = false
-			end)
-		end
-	end
-	self.Parts = {}
-end
-
-function Module:BlockCircle(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.40, 0.40) * ANG(0.1, 0, 0)
-		end
-	end))
-	for i = 1, 9 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.1)
+function Module.NonTweens:Orbit(Part, dist, angle)
+	if IsAPart(Part) then
+		local Origin = Part.CFrame or F.CN()
+		dist = dist or 10
+		angle = angle or 0
+		
+		local rpers = F.pi
+		local Connection = RS.Heartbeat:Connect(function(delta)
+			angle = (angle + delta * rpers) % (2 * F.pi)
+			Part.CFrame = Origin * F.CN(F.sin(angle) * dist, 0, F.cos(angle) * dist)
+		end)
+		table.insert(self.Connections, Connection)
+		return Connection, Part
 	end
 end
 
-function Module:BlockSnake(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.50, 0.50) * ANG(0.1, 0, 0.1)
-		end
-	end))
-	for i = 1, 50 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.1)
+function Module.NonTweens:Spin(Part, radians, usingDeg)
+	if IsAPart(Part) then
+		radians = radians or 1
+		usingDeg = usingDeg and F.deg or F.rad
+		
+		local Connection = RS.Heartbeat:Connect(function()
+			Part.CFrame *= F.ANG(0, usingDeg(radians), 0)
+		end)
+		table.insert(self.Connections, Connection)
+		return Connection, Part
 	end
 end
 
-function Module:SpiralBlockStairs(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.50, 0.50) * ANG(0, 0.1, 0)
-		end
-	end))
-	for i = 1, 50 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.1)
+function Module.NonTweens:WaveFloat(Part, Change, div, offsetH, offset)
+	if IsAPart(Part) then
+		F.sine = 0
+		Change = Change or 1
+		div = div or 20
+		offsetH = offsetH or 1.80
+		
+		local Origin = Part.CFrame or F.CN()
+		local Connection = RS.Heartbeat:Connect(function()
+			F.sine += Change
+			Part.CFrame = Part.CFrame:Lerp(Origin * F.CN(0, offsetH * F.cos(F.sine / div), 0), 1 / 6)
+		end)
+		table.insert(self.Connections, Connection)
+		return Connection, Part
 	end
 end
 
-function Module:SawBlade(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.50, 0.50) * ANG(0.5, 0, 0)
-		end
-	end))
-	for i = 1, 55 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.1)
-	end
-end
-
-function Module:JetTurbine(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= ANG(1.50, 1.50, 1.50)
-		end
-	end))
-	for i = 1, 100 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.1)
-	end
-end
-
-function Module:DancingBlocks(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.70 * math.sin(Sine / 50), 0) * ANG(0, 0, 0.1) * CN(0, 0.5, 0)
-		end
-	end))
-	for i = 1, 2 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.5)
-	end
-end
-
-function Module:CubicSpin(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.1 * math.cos(Sine / 50), 0) * ANG(0, 0.1 * math.cos(50 / Sine), 0)
-		end
-	end))
-	for i = 1, 200 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0)
-	end
-end
-
-function Module:StretchyCircle(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.50, 0.50) * ANG(0.1, 0, 0) * (#self.Parts == 70 and CN(0, 0.50 * math.cos(50 / Sine), 0.50 * math.cos(50 / Sine)) or CN())
-		end
-	end))
-	for i = 1, 70 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.01)
-	end
-end
-
-function Module:CosInfinity(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 0.55 * math.cos(Sine / 30), 0) * ANG(0.1, 0, 0)
-		end
-	end))
-	for i = 1, 200 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0)
-	end
-end
-
-function Module:PulseRunningCircles(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0, 2 * math.cos(Sine / 85), 0) * ANG(0.1, 0, 0.1)
-		end
-	end))
-	for i = 1, 150 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0)
-	end
-end
-
-function Module:Rope(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(3 * math.cos(Sine / 30), 0.50 * math.cos(Sine / 30), 0) * ANG(0.1, 0.3, 0)
-		end
-	end))
-	for i = 1, 195 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0)
-	end
-end
-
-function Module:BuildingLineStrip(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(1 * math.sin(Sine / 100), 0, 0.25 * math.sin(Sine / 100)) * ANG(0.5, 0.1, 0.1 * math.cos(10 / Sine))
-		end
-	end))
-	for i = 1, 150 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0.01)
-	end
-end
-
-function Module:BuildingSpiralStrip(At)
-	insert(self.Connections, RS.Heartbeat:Connect(function()
-		Sine += Change
-		for i = 1, #self.Parts do
-			self.Parts[i].CFrame *= CN(0.1 * math.cos(20 / Sine), 0.1 * math.cos(20 / Sine), 0.1 * math.cos(20 / Sine)) * ANG(-0.1, -0.1, 0.1)
-		end
-	end))
-	for i = 1, 500 do
-		CreatePlainBlock(self, At or CN(0, 10, 0))
-		wait(0)
-	end
-end
-
-function Module:GenerateTerrain(Xaxis, Zaxis, Seed, Height)
-	local Xaxis, Zaxis = math.abs(Xaxis or 100), math.abs(Zaxis or 100)
-	local Seed = Seed or Random.new():NextNumber(1, 1e5)
-	for X = -Xaxis, Xaxis do
-		for Z = -Zaxis, Zaxis do
-			local Block = CreatePlainBlock(self, CN())
-			Block.Position = V3(X, math.noise(Seed, X/10, Z/10) * (Height or 5), Z)
-		end
-		wait(0)
-	end
-end
-
-function Module:GenerateEvenTerrain(Xaxis, Zaxis, Seed, Height)
-	local Xaxis, Zaxis = math.abs(Xaxis or 100), math.abs(Zaxis or 100)
-	local Seed = Seed or Random.new():NextNumber(1, 1e5)
-	for X = -Xaxis, Xaxis do
-		for Z = -Zaxis, Zaxis do
-			local Block = CreatePlainBlock(self, CN())
-			Block.Position = V3(X, math.noise(Seed, X/10, Z/10) * (Height or 5), Z) * Block.Size
-		end
-		wait(0)
+function Module.NonTweens:Spiral(Part, CFx, CFy, CFz)
+	if IsAPart(Part) then
+		CFx = CFx or 0
+		CFy = CFy or 0.50
+		CFz = CFz or 0
+		
+		local Connection = RS.Heartbeat:Connect(function()
+			Part.CFrame *= F.CN(CFx, CFy, CFz) * F.ANG(0.1, 0, 0.1)
+		end)
+		table.insert(self.Connections, Connection)
+		return Connection, Part
 	end
 end
 
